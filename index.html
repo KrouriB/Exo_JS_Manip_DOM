@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Document</title>
+</head>
+<body>
+    
+    <input class="buttonStart" type="button" value="Start" />
+    <div id="leaderboard"></div>
+    <div id="board"></div>
+    
+    <script>
+        function shuffleChildren(parent){
+            let children = parent.children
+            let i = children.length, k , temp
+            while(i-- > 0){
+                k = Math.floor ( Math.random() * (i+1) )
+                temp = children[k]
+                children[k] = children[i]
+                parent.appendChild(temp)
+            }
+        }
+
+        function showReaction(type, clickedBox){
+            clickedBox.classList.add(type)
+            if(type !== "sucess"){
+                setTimeout(function(){
+                    clickedBox.classList.remove(type)
+                }, 800)
+            }
+        }
+        const box = document.createElement( "div" )
+        box.classList.add( "box" )
+
+        const score = document.createElement( "p")
+        score.classList.add( "score" )
+
+        const board = document.querySelector( "#board" )
+
+        const leaderboard = document.querySelector( "#leaderboard" )
+
+        const button = document.querySelector('input');
+
+        
+        button.addEventListener('click', pressStart);
+
+        var startTimer
+        var endTimer
+        var leTimer
+        function pressStart(){
+            let nb = 1
+            var nbCase = parseInt(window.prompt("Combien voulez vous de case :"), 10);
+            var pseudo = prompt("Inserer votre pseudo :")
+            if(/^[0-9.,]+$/.test(nbCase)){
+                button.classList.add("buttonStarted")
+                for(let i = 1 ; i <= nbCase ; i++){
+                    let newbox = box.cloneNode()
+                    newbox.innerText = i
+                    board.appendChild(newbox)
+                    newbox.addEventListener("click", function(){
+                        if(i == nb){
+                            startTimer = (nb == 1) ? Date.now() : startTimer
+                            newbox.classList.add("box-valid")
+                            if(nb == board.children.length){
+                                board.querySelectorAll(".box").forEach(function(box){
+                                    showReaction("success", box)
+                                    board.querySelectorAll(".box-valid").forEach(function(validBox){
+                                        validBox.classList.remove("box-valid")
+                                    })
+                                })
+                                var endTimer = Date.now()
+                                button.classList.remove("buttonStarted")
+                                var leTimer = Math.abs(endTimer - startTimer)
+                                leTimer = (leTimer / 1000)
+                                board.innerHTML =""
+                                console.log(leTimer)
+                                let newscore = score.cloneNode()
+                                newscore.innerHTML = pseudo + " un temps de " + leTimer + "s pour " + nbCase + " cases."
+                                leaderboard.appendChild(newscore)
+                            }
+                            nb++
+                            shuffleChildren(board)
+                        }
+                        else if(i > nb){
+                            showReaction("error", newbox)
+                            nb = 1
+                            board.querySelectorAll(".box-valid").forEach(function(validBox){
+                                validBox.classList.remove("box-valid")
+                            })
+                            shuffleChildren(board)
+                        }
+                        else{
+                            showReaction("notice", newbox)
+                        }
+                    })
+                }
+                shuffleChildren(board)
+            }
+            else{
+                alert("Ceci n'est pas un nombre !")
+            }
+        }
+
+    </script>
+</body>
+</html>
